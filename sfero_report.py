@@ -23,7 +23,7 @@ _env = _load_env()
 def _get(key): return os.environ.get(key) or _env.get(key, "")
 
 META_TOKEN   = _get("META_ACCESS_TOKEN")
-TG_TOKEN     = _get("TG_BOT_TOKEN") or "8948335437:AAGJV7Ab3oi6Z1NuX-x63TfiEdWe3J2r2HQ"
+TG_TOKEN     = _get("TG_BOT_TOKEN") or "8948335437:AAFmlGhCBHF-QlK5aLHXw1vNXFm_hUAkOvw"
 TG_CHAT      = _get("TG_CHAT_ID") or "557526625"
 SHEETS_ID    = _get("GOOGLE_SHEETS_ID")
 GCP_JSON     = _get("GOOGLE_SERVICE_ACCOUNT_JSON")
