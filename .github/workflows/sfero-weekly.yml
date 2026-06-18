@@ -2,7 +2,7 @@ name: SFERO Weekly Report
 
 on:
   schedule:
-    - cron: '0 7 * * 1'   # Monday 09:00 Spain (UTC+2)
+    - cron: '0 7 * * 1'
   workflow_dispatch:
 
 jobs:

@@ -29,7 +29,6 @@ SHEETS_ID    = _get("GOOGLE_SHEETS_ID")
 GCP_JSON     = _get("GOOGLE_SERVICE_ACCOUNT_JSON")
 AD_ACCOUNT   = "act_445844598148716"
 WEEKLY       = "--weekly" in sys.argv
-# ─────────────────────────────────────────────────────────────────────────────
 
 def api(path, params):
     p = urllib.parse.urlencode({**params, "access_token": META_TOKEN})
@@ -81,7 +80,6 @@ def get_cpl(d, leads, spend):
         c = spend / leads
     return c
 
-# ─── DAILY MESSAGE ────────────────────────────────────────────────────────────
 def build_daily(acc, camps, date_str):
     spend  = float(acc.get("spend", 0))
     impr   = int(acc.get("impressions", 0))
@@ -97,7 +95,6 @@ def build_daily(acc, camps, date_str):
     lp_rate  = (lp_view / clicks * 100) if clicks > 0 else 0
     conv_rate = (leads / lp_view * 100) if lp_view > 0 else 0
 
-    # campaigns block
     camp_lines = []
     crit_camps = []
     for c in camps:
@@ -110,29 +107,26 @@ def build_daily(acc, camps, date_str):
         cfreq  = float(c.get("frequency", 0))
         ok     = cctr >= 3 and (ccpl < 8 or cl == 0) and cfreq < 3
         bad    = cctr < 1.5 or (ccpl > 15 and cl > 0) or cfreq > 3.5
-        ico    = "🟢" if ok else ("🔴" if bad else "🟡")
+        ico    = "\U0001f7e2" if ok else ("\U0001f534" if bad else "\U0001f7e1")
         if bad: crit_camps.append(name[:35])
-        leads_str = f"🎯 {cl} лід · CPL ${ccpl:.2f}" if cl > 0 else "лідів нема"
+        leads_str = f"\U0001f3af {cl} лід · CPL ${ccpl:.2f}" if cl > 0 else "лідів нема"
         camp_lines.append(
             f"{ico} <b>{name}</b>\n"
-            f"    💸${cs:.2f} · CTR {cctr:.2f}% · CPC ${ccpc:.2f} · freq {cfreq:.1f} · {leads_str}")
+            f"    \U0001f4b8${cs:.2f} · CTR {cctr:.2f}% · CPC ${ccpc:.2f} · freq {cfreq:.1f} · {leads_str}")
 
-    # recs
     good, warn, crit = [], [], []
-    if ctr > 3:      good.append(f"CTR {ctr:.2f}% — вище норми (ціль >3%)")
+    if ctr > 3:      good.append(f"CTR {ctr:.2f}% — вище норми")
     if cpc < 0.35:   good.append(f"CPC ${cpc:.2f} — ефективна ціна кліку")
     if leads > 5:    good.append(f"{leads} лідів — хороший об'єм")
-    if 0 < cpl < 6:  good.append(f"CPL ${cpl:.2f} — відмінна вартість ліда")
+    if 0 < cpl < 6:  good.append(f"CPL ${cpl:.2f} — відмінна вартість")
     if lp_rate > 60: good.append(f"LPV rate {lp_rate:.0f}% — якісний трафік")
-
     if ctr < 2:       warn.append(f"CTR {ctr:.2f}% — нижче норми, тест нових креативів")
     if freq > 2.5:    warn.append(f"Frequency {freq:.2f} — аудиторія перегрівається")
     if lp_rate < 40:  warn.append(f"LPV {lp_rate:.0f}% від кліків — відмова на лендінгу")
     if conv_rate < 5 and leads > 0:
         warn.append(f"Конверсія LPV→ліди {conv_rate:.1f}% — перевір форму/оффер")
-
-    if leads == 0:   crit.append("0 лідів — перевір піксель та форми")
-    if cpl > 15:     crit.append(f"CPL ${cpl:.2f} — критично висока вартість ліда")
+    if leads == 0:   crit.append("​0 лідів — перевір піксель та форми")
+    if cpl > 15:     crit.append(f"CPL ${cpl:.2f} — критично висока вартість")
     if spend > 150:  crit.append(f"Витрати ${spend:.2f} — перевір денні бюджети")
     for n in crit_camps:
         crit.append(f"Зупини/перезапусти: {n}")
@@ -142,32 +136,31 @@ def build_daily(acc, camps, date_str):
     cr = "\n".join(f"⛔ {x}" for x in crit) or "—"
 
     return (
-        f"🏠 <b>SFERO Real Estate — Щоденний звіт</b>\n"
-        f"📅 <b>{date_str}</b>\n"
+        f"\U0001f3e0 <b>SFERO Real Estate — Щоденний звіт</b>\n"
+        f"\U0001f4c5 <b>{date_str}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>📊 РЕЗУЛЬТАТИ ЗА ДЕНЬ</b>\n"
-        f"💸 Витрати:         <b>${spend:.2f}</b>\n"
-        f"🎯 Ліди:              <b>{leads}</b>\n"
-        f"💰 CPL:               <b>${cpl:.2f}</b>\n"
-        f"👁 Покази:           <b>{impr:,}</b>\n"
-        f"🖱 Кліки:             <b>{clicks:,}</b>\n"
-        f"📈 CTR:               <b>{ctr:.2f}%</b>\n"
-        f"💵 CPC:               <b>${cpc:.2f}</b>\n"
-        f"🏠 LPV:               <b>{lp_view:,}</b> ({lp_rate:.0f}% від кліків)\n"
-        f"🔁 Конверсія:      <b>{conv_rate:.1f}%</b> (ліди/LPV)\n"
-        f"🎯 Охоплення:    <b>{reach:,}</b> · freq <b>{freq:.2f}</b>\n"
+        f"<b>\U0001f4ca РЕЗУЛЬТАТИ ЗА ДЕНЬ</b>\n"
+        f"\U0001f4b8 Витрати:         <b>${spend:.2f}</b>\n"
+        f"\U0001f3af Ліди:              <b>{leads}</b>\n"
+        f"\U0001f4b0 CPL:               <b>${cpl:.2f}</b>\n"
+        f"\U0001f441 Покази:           <b>{impr:,}</b>\n"
+        f"\U0001f5b1 Кліки:             <b>{clicks:,}</b>\n"
+        f"\U0001f4c8 CTR:               <b>{ctr:.2f}%</b>\n"
+        f"\U0001f4b5 CPC:               <b>${cpc:.2f}</b>\n"
+        f"\U0001f3e0 LPV:               <b>{lp_view:,}</b> ({lp_rate:.0f}% від кліків)\n"
+        f"\U0001f501 Конверсія:      <b>{conv_rate:.1f}%</b> (ліди/LPV)\n"
+        f"\U0001f3af Охоплення:    <b>{reach:,}</b> · freq <b>{freq:.2f}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>📂 КАМПАНІЇ</b>\n"
+        f"<b>\U0001f4c2 КАМПАНІЇ</b>\n"
         f"{chr(10).join(camp_lines) or '—'}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f"<b>✅ ЩО ДОБРЕ ПРАЦЮЄ</b>\n{g}\n"
         f"<b>⚠️ НА ЩО ЗВЕРНУТИ УВАГУ</b>\n{w}\n"
-        f"<b>🚨 КРИТИЧНО</b>\n{cr}\n"
+        f"<b>\U0001f6a8 КРИТИЧНО</b>\n{cr}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"💬 Надішли фідбек по лідах — врахую у тижневому звіті"
+        f"\U0001f4ac Надішли фідбек по лідах — врахую у тижневому звіті"
     )
 
-# ─── WEEKLY MESSAGE ───────────────────────────────────────────────────────────
 def build_weekly(acc7, camps7, date_str):
     spend7  = float(acc7.get("spend", 0))
     impr7   = int(acc7.get("impressions", 0))
@@ -189,11 +182,11 @@ def build_weekly(acc7, camps7, date_str):
         ccpl  = get_cpl(c, cl, cs)
         ok    = cctr >= 3 and (ccpl < 8 or cl == 0)
         bad   = cctr < 1.5 or (ccpl > 15 and cl > 0)
-        ico   = "🟢" if ok else ("🔴" if bad else "🟡")
+        ico   = "\U0001f7e2" if ok else ("\U0001f534" if bad else "\U0001f7e1")
         leads_str = f"{cl} лід · CPL ${ccpl:.2f}" if cl > 0 else "лідів нема"
         camp_lines.append(
             f"{ico} <b>{name}</b>\n"
-            f"    💸${cs:.2f} · CTR {cctr:.2f}% · CPC ${ccpc:.2f} · {leads_str}")
+            f"    \U0001f4b8${cs:.2f} · CTR {cctr:.2f}% · CPC ${ccpc:.2f} · {leads_str}")
 
     recs = []
     if cpl7 > 10:  recs.append("• CPL >$10 — протести нові офери / аудиторії")
@@ -204,29 +197,28 @@ def build_weekly(acc7, camps7, date_str):
     if not recs: recs.append("• Показники стабільні — тримай поточну стратегію")
 
     return (
-        f"🏠 <b>SFERO — Тижневий звіт Meta Ads</b>\n"
-        f"📅 <b>{date_str}</b>\n"
+        f"\U0001f3e0 <b>SFERO — Тижневий звіт Meta Ads</b>\n"
+        f"\U0001f4c5 <b>{date_str}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>📊 ПІДСУМОК ТИЖНЯ</b>\n"
-        f"💸 Витрати:         <b>${spend7:.2f}</b>\n"
-        f"🎯 Ліди:              <b>{leads7}</b>\n"
-        f"💰 CPL:               <b>${cpl7:.2f}</b>\n"
-        f"👁 Покази:           <b>{impr7:,}</b>\n"
-        f"🖱 Кліки:             <b>{clicks7:,}</b>\n"
-        f"📈 CTR:               <b>{ctr7:.2f}%</b>\n"
-        f"💵 CPC:               <b>${cpc7:.2f}</b>\n"
-        f"🎯 Охоплення:    <b>{reach7:,}</b> · freq <b>{freq7:.2f}</b>\n"
+        f"<b>\U0001f4ca ПІДСУМОК ТИЖНЯ</b>\n"
+        f"\U0001f4b8 Витрати:         <b>${spend7:.2f}</b>\n"
+        f"\U0001f3af Ліди:              <b>{leads7}</b>\n"
+        f"\U0001f4b0 CPL:               <b>${cpl7:.2f}</b>\n"
+        f"\U0001f441 Покази:           <b>{impr7:,}</b>\n"
+        f"\U0001f5b1 Кліки:             <b>{clicks7:,}</b>\n"
+        f"\U0001f4c8 CTR:               <b>{ctr7:.2f}%</b>\n"
+        f"\U0001f4b5 CPC:               <b>${cpc7:.2f}</b>\n"
+        f"\U0001f3af Охоплення:    <b>{reach7:,}</b> · freq <b>{freq7:.2f}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>📂 КАМПАНІЇ ЗА ТИЖДЕНЬ</b>\n"
+        f"<b>\U0001f4c2 КАМПАНІЇ ЗА ТИЖДЕНЬ</b>\n"
         f"{chr(10).join(camp_lines) or '—'}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"<b>💡 РЕКОМЕНДАЦІЇ НА НАСТУПНИЙ ТИЖДЕНЬ</b>\n"
+        f"<b>\U0001f4a1 РЕКОМЕНДАЦІЇ НА НАСТУПНИЙ ТИЖДЕНЬ</b>\n"
         f"{chr(10).join(recs)}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"💬 Надішли фідбек по якості лідів за тиждень"
+        f"\U0001f4ac Надішли фідбек по якості лідів за тиждень"
     )
 
-# ─── TELEGRAM ─────────────────────────────────────────────────────────────────
 def send_tg(text):
     data = urllib.parse.urlencode({
         "chat_id": TG_CHAT, "text": text,
@@ -236,7 +228,6 @@ def send_tg(text):
             f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage", data) as r:
         return json.loads(r.read())
 
-# ─── GOOGLE SHEETS ────────────────────────────────────────────────────────────
 def log_to_sheets(row: dict):
     if not SHEETS_ID or not GCP_JSON:
         return
@@ -248,15 +239,12 @@ def log_to_sheets(row: dict):
         creds  = Credentials.from_service_account_info(creds_dict, scopes=scopes)
         gc     = gspread.authorize(creds)
         sh     = gc.open_by_key(SHEETS_ID)
-
-        # Daily sheet
         try:
             ws = sh.worksheet("Daily")
         except Exception:
             ws = sh.add_worksheet("Daily", rows=1000, cols=15)
             ws.append_row(["Дата","Витрати $","Покази","Кліки","CTR %",
                            "CPC $","Охоплення","Freq","LPV","Conv %","Ліди","CPL $"])
-
         ws.append_row([
             row["date"], row["spend"], row["impressions"], row["clicks"],
             row["ctr"],  row["cpc"],   row["reach"],       row["freq"],
@@ -266,12 +254,10 @@ def log_to_sheets(row: dict):
     except Exception as e:
         print(f"⚠️  Sheets error (non-fatal): {e}")
 
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
-
     if WEEKLY:
-        print("📡 Fetching weekly data...")
+        print("\U0001f4e1 Fetching weekly data...")
         acc7   = fetch_account("last_7d")
         camps7 = fetch_campaigns("last_7d")
         if not acc7:
@@ -280,12 +266,11 @@ if __name__ == "__main__":
         week_start = (datetime.now() - timedelta(days=7)).strftime("%d.%m.%Y")
         msg = build_weekly(acc7, camps7, f"{week_start} — {week_end}")
     else:
-        print("📡 Fetching daily data...")
+        print("\U0001f4e1 Fetching daily data...")
         acc   = fetch_account("yesterday")
         camps = fetch_campaigns("yesterday")
         if not acc:
             print("⚠️  No data — no campaigns running yesterday"); sys.exit(0)
-
         spend  = float(acc.get("spend", 0))
         leads  = get_leads(acc)
         cpl    = get_cpl(acc, leads, spend)
@@ -294,7 +279,6 @@ if __name__ == "__main__":
         clicks = int(acc.get("clicks", 0))
         lp_rate = (lp_view / clicks * 100) if clicks > 0 else 0
         conv    = (leads / lp_view * 100) if lp_view > 0 else 0
-
         msg = build_daily(acc, camps, yesterday)
         log_to_sheets({
             "date":        yesterday,
@@ -310,7 +294,6 @@ if __name__ == "__main__":
             "leads":       leads,
             "cpl":         round(cpl, 2),
         })
-
     res = send_tg(msg)
     if res.get("ok"):
         print(f"✅ {'Weekly' if WEEKLY else 'Daily'} report sent!")
