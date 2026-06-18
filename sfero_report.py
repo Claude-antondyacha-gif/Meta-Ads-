@@ -29,7 +29,7 @@ SHEETS_ID    = _get("GOOGLE_SHEETS_ID")
 GCP_JSON     = _get("GOOGLE_SERVICE_ACCOUNT_JSON")
 AD_ACCOUNT   = "act_445844598148716"
 WEEKLY       = "--weekly" in sys.argv
-# ─────────────────────────────────────────────────────────────────────────────
+BR           = "\n "
 
 def api(path, params):
     p = urllib.parse.urlencode({**params, "access_token": META_TOKEN})
@@ -129,7 +129,7 @@ def build_daily(acc, camps, date_str):
     if conv_rate < 5 and leads > 0:
         warn.append(f"Конверсія LPV→ліди {conv_rate:.1f}% — перевір форму/оффер")
 
-    if leads == 0:   crit.append("​0 лідів — перевір піксель та форми")
+    if leads == 0:   crit.append("0 лідів — перевір піксель та форми")
     if cpl > 15:     crit.append(f"CPL ${cpl:.2f} — критично висока вартість ліда")
     if spend > 150:  crit.append(f"Витрати ${spend:.2f} — перевір денні бюджети")
     for n in crit_camps:
@@ -139,12 +139,12 @@ def build_daily(acc, camps, date_str):
     w = "\n".join(f"⚠️ {x}" for x in warn) or "—"
     cr = "\n".join(f"⛔ {x}" for x in crit) or "—"
 
-    camps_block = "\n\n".join(camp_lines) if camp_lines else "—"
+    camps_block = ("\n \n").join(camp_lines) if camp_lines else "—"
     return (
         f"\U0001f3e0 <b>SFERO Real Estate — Щоденний звіт</b>\n"
         f"\U0001f4c5 <b>{date_str}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n\U0001f4ca <b>РЕЗУЛЬТАТИ ЗА ДЕНЬ</b>\n\n"
+        f" \n\U0001f4ca <b>РЕЗУЛЬТАТИ ЗА ДЕНЬ</b>\n \n"
         f"\U0001f4b8 Витрати:         <b>${spend:.2f}</b>\n"
         f"\U0001f3af Ліди:              <b>{leads}</b>\n"
         f"\U0001f4b0 CPL:               <b>${cpl:.2f}</b>\n"
@@ -156,12 +156,12 @@ def build_daily(acc, camps, date_str):
         f"\U0001f501 Конверсія:      <b>{conv_rate:.1f}%</b> (ліди/LPV)\n"
         f"\U0001f3af Охоплення:    <b>{reach:,}</b> · freq <b>{freq:.2f}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n\U0001f4c2 <b>КАМПАНІЇ</b>\n\n"
+        f" \n\U0001f4c2 <b>КАМПАНІЇ</b>\n \n"
         f"{camps_block}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"✅ ЩО ДОБРЕ ПРАЦЮЄ\n\n{g}\n\n"
-        f"⚠️ НА ЩО ЗВЕРНУТИ УВАГУ\n\n{w}\n\n"
-        f"\U0001f6a8 КРИТИЧНО\n\n{cr}\n"
+        f"✅ ЩО ДОБРЕ ПРАЦЮЄ\n \n{g}\n \n"
+        f"⚠️ НА ЩО ЗВЕРНУТИ УВАГУ\n \n{w}\n \n"
+        f"\U0001f6a8 КРИТИЧНО\n \n{cr}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f"\U0001f4ac Надішли фідбек по лідах — врахую у тижневому звіті"
     )
@@ -202,12 +202,12 @@ def build_weekly(acc7, camps7, date_str):
     if 0 < cpl7 < 6: recs.append("• Відмінний CPL — тестуй збільшення бюджету")
     if not recs: recs.append("• Показники стабільні — тримай поточну стратегію")
 
-    camps_block7 = "\n\n".join(camp_lines) if camp_lines else "—"
+    camps_block7 = ("\n \n").join(camp_lines) if camp_lines else "—"
     return (
         f"\U0001f3e0 <b>SFERO — Тижневий звіт Meta Ads</b>\n"
         f"\U0001f4c5 <b>{date_str}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n\U0001f4ca <b>ПІДСУМОК ТИЖНЯ</b>\n\n"
+        f" \n\U0001f4ca <b>ПІДСУМОК ТИЖНЯ</b>\n \n"
         f"\U0001f4b8 Витрати:         <b>${spend7:.2f}</b>\n"
         f"\U0001f3af Ліди:              <b>{leads7}</b>\n"
         f"\U0001f4b0 CPL:               <b>${cpl7:.2f}</b>\n"
@@ -217,10 +217,10 @@ def build_weekly(acc7, camps7, date_str):
         f"\U0001f4b5 CPC:               <b>${cpc7:.2f}</b>\n"
         f"\U0001f3af Охоплення:    <b>{reach7:,}</b> · freq <b>{freq7:.2f}</b>\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n\U0001f4c2 <b>КАМПАНІЇ ЗА ТИЖДЕНЬ</b>\n\n"
+        f" \n\U0001f4c2 <b>КАМПАНІЇ ЗА ТИЖДЕНЬ</b>\n \n"
         f"{camps_block7}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"\n\U0001f4a1 <b>РЕКОМЕНДАЦІЇ НА НАСТУПНИЙ ТИЖДЕНЬ</b>\n\n"
+        f" \n\U0001f4a1 <b>РЕКОМЕНДАЦІЇ НА НАСТУПНИЙ ТИЖДЕНЬ</b>\n \n"
         f"{chr(10).join(recs)}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f"\U0001f4ac Надішли фідбек по якості лідів за тиждень"
