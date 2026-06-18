@@ -26,7 +26,7 @@ META_TOKEN   = _get("META_ACCESS_TOKEN")
 TG_TOKEN     = _get("TG_BOT_TOKEN") or "8948335437:AAFmlGhCBHF-QlK5aLHXw1vNXFm_hUAkOvw"
 TG_CHAT      = _get("TG_CHAT_ID") or "557526625"
 GROUP_CHAT   = "-1003995513476"   # SNAP - Meta Ads Sfero Real Estate
-GROUP_THREAD = "3995513476"       # гілка Звітність
+GROUP_THREAD = None               # встанови ID теми якщо потрібна конкретна гілка
 SHEETS_ID    = _get("GOOGLE_SHEETS_ID")
 GCP_JSON     = _get("GOOGLE_SERVICE_ACCOUNT_JSON")
 AD_ACCOUNT   = "act_445844598148716"
@@ -194,13 +194,26 @@ def build_weekly(acc7, camps7, date_str):
             f"{ico} <b>{name}</b>\n"
             f"    \U0001f4b8${cs:.2f} · CTR {cctr:.2f}% · CPC ${ccpc:.2f} · {leads_str}")
 
+    good7, warn7, crit7 = [], [], []
+    if ctr7 > 3:       good7.append(f"CTR {ctr7:.2f}% — вище норми (ціль >3%)")
+    if cpc7 < 0.35:    good7.append(f"CPC ${cpc7:.2f} — ефективна ціна кліку")
+    if leads7 > 20:    good7.append(f"{leads7} лідів — хороший об'єм за тиждень")
+    if 0 < cpl7 < 6:   good7.append(f"CPL ${cpl7:.2f} — відмінна вартість ліда")
+    if ctr7 < 2.5:     warn7.append(f"CTR {ctr7:.2f}% — онови відео-креативи або карусель")
+    if freq7 > 2.5:    warn7.append(f"Frequency {freq7:.2f} — розшир аудиторію або вимкни вузькі")
+    if 6 <= cpl7 <= 10: warn7.append(f"CPL ${cpl7:.2f} — є простір для оптимізації")
+    if leads7 == 0:    crit7.append("0 лідів за тиждень — перевір піксель та форми")
+    if cpl7 > 10:      crit7.append(f"CPL ${cpl7:.2f} — протести нові офери / аудиторії")
+    if freq7 > 3.5:    crit7.append(f"Frequency {freq7:.2f} — аудиторія перегрівається, треба освіжити")
+
     recs = []
-    if cpl7 > 10:  recs.append("• CPL >$10 — протести нові офери / аудиторії")
-    if ctr7 < 2.5: recs.append("• CTR <2.5% — онови відео-креативи або карусель")
-    if freq7 > 2.5: recs.append("• Frequency >2.5 — розшир аудиторію або вимкни вузькі")
-    if leads7 > 20: recs.append("• Гарний об'єм лідів — маштабуй топ кампанії +20%")
-    if 0 < cpl7 < 6: recs.append("• Відмінний CPL — тестуй збільшення бюджету")
-    if not recs: recs.append("• Показники стабільні — тримай поточну стратегію")
+    if leads7 > 20:    recs.append("• Гарний об'єм лідів — маштабуй топ кампанії +20%")
+    if 0 < cpl7 < 6:   recs.append("• Відмінний CPL — тестуй збільшення бюджету")
+    if not recs:        recs.append("• Показники стабільні — тримай поточну стратегію")
+
+    g7  = "\n".join(f"✅ {x}" for x in good7) or "—"
+    w7  = "\n".join(f"⚠️ {x}" for x in warn7) or "—"
+    cr7 = "\n".join(f"🚨 {x}" for x in crit7) or "—"
 
     camps_block7 = "\n \n".join(camp_lines) if camp_lines else "—"
     return (
@@ -219,6 +232,10 @@ def build_weekly(acc7, camps7, date_str):
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f" \n\U0001f4c2 <b>КАМПАНІЇ ЗА ТИЖДЕНЬ</b>\n \n"
         f"{camps_block7}\n"
+        f"━━━━━━━━━━━━━━━━━━━━━━\n"
+        f"✅ ЩО ДОБРЕ ПРАЦЮЄ\n \n{g7}\n \n"
+        f"⚠️ НА ЩО ЗВЕРНУТИ УВАГУ\n \n{w7}\n \n"
+        f"\U0001f6a8 КРИТИЧНО\n \n{cr7}\n"
         f"━━━━━━━━━━━━━━━━━━━━━━\n"
         f" \n\U0001f4a1 <b>РЕКОМЕНДАЦІЇ НА НАСТУПНИЙ ТИЖДЕНЬ</b>\n \n"
         f"{chr(10).join(recs)}\n"
