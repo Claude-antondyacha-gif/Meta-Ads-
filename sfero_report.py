@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 # ─── CONFIG (update token when it expires) ───────────────────────────────────
 META_TOKEN   = "EAASydDZC4n4MBRrq9BucPUMEC8TBDXfabdg1yDwOOfM9oAi4sk1dpyUTGDiZCJr2CNShyrz69ZCvK3oCRKe84FfQtzwlN6bE8ZAwzrYKLFsdZAZAwRpps8S66dTdXCS3jJAMZA1507v6yP4T4EjPEWUkApgJCApjwnxRJAAHOERGp0brLdZACGMWEtt8zaZCC58Px5Df4uRSqZBLZBudWZBrHuWcHXSQQysF6nvJZBNAZCZBgnk56dpXiEoWXNzRsrA69phCcKEZBoyEMS4j6s3w0cJa57u4SCGI"
 AD_ACCOUNT   = "act_445844598148716"
-TG_BOT_TOKEN = "7545048373:AAHzJ6MAfSHqXMeVN6BKJiJXFYyZNcT3jTg"
+TG_BOT_TOKEN = "8948335437:AAGJV7Ab3oi6Z1NuX-x63TfiEdWe3J2r2HQ"
 TG_CHAT_ID   = "557526625"
 # ─────────────────────────────────────────────────────────────────────────────
 
