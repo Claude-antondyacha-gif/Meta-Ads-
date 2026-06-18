@@ -25,6 +25,8 @@ def _get(key): return os.environ.get(key) or _env.get(key, "")
 META_TOKEN   = _get("META_ACCESS_TOKEN")
 TG_TOKEN     = _get("TG_BOT_TOKEN") or "8948335437:AAFmlGhCBHF-QlK5aLHXw1vNXFm_hUAkOvw"
 TG_CHAT      = _get("TG_CHAT_ID") or "557526625"
+GROUP_CHAT   = "-1003995513476"   # SNAP - Meta Ads Sfero Real Estate
+GROUP_THREAD = "3995513476"       # гілка Звітність
 SHEETS_ID    = _get("GOOGLE_SHEETS_ID")
 GCP_JSON     = _get("GOOGLE_SERVICE_ACCOUNT_JSON")
 AD_ACCOUNT   = "act_445844598148716"
@@ -122,13 +124,11 @@ def build_daily(acc, camps, date_str):
     if leads > 5:    good.append(f"{leads} лідів — хороший об'єм")
     if 0 < cpl < 6:  good.append(f"CPL ${cpl:.2f} — відмінна вартість ліда")
     if lp_rate > 60: good.append(f"LPV rate {lp_rate:.0f}% — якісний трафік")
-
     if ctr < 2:       warn.append(f"CTR {ctr:.2f}% — нижче норми, тест нових креативів")
     if freq > 2.5:    warn.append(f"Frequency {freq:.2f} — аудиторія перегрівається")
     if lp_rate < 40:  warn.append(f"LPV {lp_rate:.0f}% від кліків — відмова на лендінгу")
     if conv_rate < 5 and leads > 0:
         warn.append(f"Конверсія LPV→ліди {conv_rate:.1f}% — перевір форму/оффер")
-
     if leads == 0:   crit.append("0 лідів — перевір піксель та форми")
     if cpl > 15:     crit.append(f"CPL ${cpl:.2f} — критично висока вартість ліда")
     if spend > 150:  crit.append(f"Витрати ${spend:.2f} — перевір денні бюджети")
@@ -139,7 +139,7 @@ def build_daily(acc, camps, date_str):
     w = "\n".join(f"⚠️ {x}" for x in warn) or "—"
     cr = "\n".join(f"⛔ {x}" for x in crit) or "—"
 
-    camps_block = ("\n \n").join(camp_lines) if camp_lines else "—"
+    camps_block = "\n \n".join(camp_lines) if camp_lines else "—"
     return (
         f"\U0001f3e0 <b>SFERO Real Estate — Щоденний звіт</b>\n"
         f"\U0001f4c5 <b>{date_str}</b>\n"
@@ -198,11 +198,11 @@ def build_weekly(acc7, camps7, date_str):
     if cpl7 > 10:  recs.append("• CPL >$10 — протести нові офери / аудиторії")
     if ctr7 < 2.5: recs.append("• CTR <2.5% — онови відео-креативи або карусель")
     if freq7 > 2.5: recs.append("• Frequency >2.5 — розшир аудиторію або вимкни вузькі")
-    if leads7 > 20: recs.append("• Гарний об'єм лідів — масштабуй топ кампанії +20%")
+    if leads7 > 20: recs.append("• Гарний об'єм лідів — маштабуй топ кампанії +20%")
     if 0 < cpl7 < 6: recs.append("• Відмінний CPL — тестуй збільшення бюджету")
     if not recs: recs.append("• Показники стабільні — тримай поточну стратегію")
 
-    camps_block7 = ("\n \n").join(camp_lines) if camp_lines else "—"
+    camps_block7 = "\n \n".join(camp_lines) if camp_lines else "—"
     return (
         f"\U0001f3e0 <b>SFERO — Тижневий звіт Meta Ads</b>\n"
         f"\U0001f4c5 <b>{date_str}</b>\n"
@@ -227,14 +227,24 @@ def build_weekly(acc7, camps7, date_str):
     )
 
 # ─── TELEGRAM ─────────────────────────────────────────────────────────────────
-def send_tg(text):
-    data = urllib.parse.urlencode({
-        "chat_id": TG_CHAT, "text": text,
+def send_tg(chat_id, text, thread_id=None):
+    params = {
+        "chat_id": chat_id, "text": text,
         "parse_mode": "HTML", "disable_web_page_preview": "true"
-    }).encode()
+    }
+    if thread_id:
+        params["message_thread_id"] = thread_id
+    data = urllib.parse.urlencode(params).encode()
     with urllib.request.urlopen(
             f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage", data) as r:
         return json.loads(r.read())
+
+def broadcast(text):
+    send_tg(TG_CHAT, text)
+    try:
+        send_tg(GROUP_CHAT, text, GROUP_THREAD)
+    except Exception as e:
+        print(f"⚠️  Group send failed (non-fatal): {e}")
 
 # ─── GOOGLE SHEETS ────────────────────────────────────────────────────────────
 def log_to_sheets(row: dict):
@@ -306,8 +316,5 @@ if __name__ == "__main__":
             "cpl":         round(cpl, 2),
         })
 
-    res = send_tg(msg)
-    if res.get("ok"):
-        print(f"✅ {'Weekly' if WEEKLY else 'Daily'} report sent!")
-    else:
-        print(f"❌ Telegram error: {res}")
+    broadcast(msg)
+    print(f"✅ {'Weekly' if WEEKLY else 'Daily'} report sent!")
