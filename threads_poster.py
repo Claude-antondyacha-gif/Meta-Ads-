@@ -45,8 +45,12 @@ def t_post(path, params):
     req = urllib.request.Request(
         f"{THREADS_BASE}/{path}", data=data,
         headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"HTTP {e.code}: {body}")
 
 def get_user_id():
     return t_get("me", {"fields": "id,username"})
