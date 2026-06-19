@@ -34,7 +34,7 @@ POST_MODE      = "--post"      in sys.argv
 REPLY_MODE     = "--reply"     in sys.argv
 ANALYTICS_MODE = "--analytics" in sys.argv
 
-POSTS_PER_RUN  = 3
+POSTS_PER_RUN  = 1
 
 # ─── THREADS API ──────────────────────────────────────────────────────────────
 def t_get(path, params=None):
@@ -331,27 +331,26 @@ def run_analytics(user_id):
 
 # ─── РЕЖИМ: ПОСТИНГ ───────────────────────────────────────────────────────────
 def run_post(user_id):
+    # 75% шанс публікувати — щоб пости виходили нерівномірно, як жива людина
+    if random.random() > 0.75:
+        print("⏭️  Пропускаємо цей запуск (живий режим)")
+        return
+
     kb = load_kb()
     top_topics = kb.get("top_topics", [])
 
-    # Підбираємо теми: 60% особистість/охват, 40% лідген
     personal = [t for t in TOPICS if t["category"] in ("personal", "lifehack", "update", "opinion", "engagement", "tips")]
     leadgen  = [t for t in TOPICS if t["category"] in ("case", "offer", "education")]
 
-    # Посилюємо топ-категорії якщо є аналітика
     if top_topics:
         boosted = [t for t in TOPICS if t["category"] in top_topics]
         if boosted:
             personal = boosted + personal
 
-    # Збалансований мікс
-    n_personal = max(1, round(POSTS_PER_RUN * 0.6))
-    n_leadgen  = POSTS_PER_RUN - n_personal
-
-    selected = []
-    selected += random.sample(personal, min(n_personal, len(personal)))
-    selected += random.sample(leadgen,  min(n_leadgen,  len(leadgen)))
-    random.shuffle(selected)
+    # Кожен 3-й пост — лідген, решта — охват/особистість
+    kb_posts = kb.get("total_posts", 0)
+    pool = leadgen if (kb_posts % 3 == 2) else personal
+    selected = random.sample(pool, min(POSTS_PER_RUN, len(pool)))
 
     post_system = build_post_system()
     analytics = load_analytics()
