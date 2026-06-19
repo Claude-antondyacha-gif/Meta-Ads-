@@ -1,0 +1,20 @@
+name: Threads Auto Post
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # 09:00 Spain (UTC+2)
+    - cron: '0 11 * * *'  # 13:00 Spain
+    - cron: '0 16 * * *'  # 18:00 Spain
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post to Threads
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python3 threads_poster.py --post
