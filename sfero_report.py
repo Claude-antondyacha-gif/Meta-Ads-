@@ -38,8 +38,16 @@ def api(path, params):
     req = urllib.request.Request(
         f"https://graph.facebook.com/v19.0/{path}?{p}",
         headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        err = json.loads(body) if body else {}
+        msg = err.get("error", {}).get("message", body)
+        if "token" in msg.lower() or "oauth" in msg.lower() or "expired" in msg.lower():
+            _alert_token_expired(msg)
+        raise RuntimeError(f"Meta API error: {msg}")
 
 def action(arr, *types):
     for a in (arr or []):
@@ -244,6 +252,23 @@ def build_weekly(acc7, camps7, date_str):
     )
 
 # ─── TELEGRAM ─────────────────────────────────────────────────────────────────
+def _alert_token_expired(detail=""):
+    text = (
+        "⚠️ <b>SFERO — Токен Meta прострочений</b>\n\n"
+        "Автоматичний звіт не надіслано.\n\n"
+        "Оновіть <code>META_ACCESS_TOKEN</code> у GitHub Secrets:\n"
+        "Settings → Secrets → Actions → META_ACCESS_TOKEN\n\n"
+        f"<i>{detail[:200]}</i>"
+    )
+    try:
+        data = urllib.parse.urlencode({
+            "chat_id": TG_CHAT, "text": text, "parse_mode": "HTML"
+        }).encode()
+        urllib.request.urlopen(
+            f"https://api.telegram.org/bot{TG_TOKEN}/sendMessage", data)
+    except Exception:
+        pass
+
 def send_tg(chat_id, text, thread_id=None):
     params = {
         "chat_id": chat_id, "text": text,
@@ -292,6 +317,7 @@ def log_to_sheets(row: dict):
 
 # ─── MAIN ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+  try:
     yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
 
     if WEEKLY:
@@ -335,3 +361,10 @@ if __name__ == "__main__":
 
     broadcast(msg)
     print(f"✅ {'Weekly' if WEEKLY else 'Daily'} report sent!")
+  except RuntimeError as e:
+    print(f"❌ {e}")
+    sys.exit(1)
+  except Exception as e:
+    print(f"❌ Unexpected error: {e}")
+    _alert_token_expired(str(e))
+    sys.exit(1)
