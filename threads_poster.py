@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
 Threads Lead Generation Bot
-Автопостинг + відповіді в коментарях + кваліфікація лідів
 """
-import urllib.request, urllib.parse, json, sys, os, random, time
+import urllib.request, urllib.parse, urllib.error, json, sys, os, random, time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# ─── CONFIG ───────────────────────────────────────────────────────────────────
 def _load_env():
     env = {}
     p = Path(__file__).parent / ".env.local"
@@ -29,24 +27,31 @@ STATE_FILE      = Path(__file__).parent / "replied_comments.json"
 POST_MODE       = "--post"  in sys.argv
 REPLY_MODE      = "--reply" in sys.argv
 
-POSTS_PER_RUN   = 4   # 3 рази на день = 12 постів/день
+POSTS_PER_RUN   = 4
 
-# ─── THREADS API ──────────────────────────────────────────────────────────────
 def t_get(path, params=None):
     p = urllib.parse.urlencode({**(params or {}), "access_token": THREADS_TOKEN})
     req = urllib.request.Request(
         f"{THREADS_BASE}/{path}?{p}",
         headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"HTTP {e.code}: {body}")
 
 def t_post(path, params):
     data = urllib.parse.urlencode({**params, "access_token": THREADS_TOKEN}).encode()
     req = urllib.request.Request(
         f"{THREADS_BASE}/{path}", data=data,
         headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"HTTP {e.code}: {body}")
 
 def get_user_id():
     return t_get("me", {"fields": "id,username"})
@@ -58,7 +63,7 @@ def publish_thread(user_id, text):
     })
     cid = container.get("id")
     if not cid:
-        raise RuntimeError(f"Failed to create container: {container}")
+        raise RuntimeError(f"No container id: {container}")
     time.sleep(3)
     result = t_post(f"{user_id}/threads_publish", {"creation_id": cid})
     return result.get("id")
@@ -71,7 +76,7 @@ def reply_to_thread(user_id, reply_to_id, text):
     })
     cid = container.get("id")
     if not cid:
-        raise RuntimeError(f"Failed to create reply container: {container}")
+        raise RuntimeError(f"No reply container id: {container}")
     time.sleep(2)
     result = t_post(f"{user_id}/threads_publish", {"creation_id": cid})
     return result.get("id")
@@ -96,7 +101,6 @@ def get_replies(thread_id):
         print(f"  ⚠️  Replies error for {thread_id}: {e}")
         return []
 
-# ─── CLAUDE API ───────────────────────────────────────────────────────────────
 def claude(system_prompt, user_msg, max_tokens=600):
     data = json.dumps({
         "model": "claude-haiku-4-5-20251001",
@@ -114,12 +118,15 @@ def claude(system_prompt, user_msg, max_tokens=600):
             "User-Agent": "Mozilla/5.0"
         }
     )
-    with urllib.request.urlopen(req) as r:
-        return json.loads(r.read())["content"][0]["text"].strip()
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())["content"][0]["text"].strip()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"Claude API HTTP {e.code}: {body}")
 
-# ─── СИСТЕМНИЙ ПРОМПТ ДЛЯ ПОСТІВ ─────────────────────────────────────────────
 POST_SYSTEM = """Ти — Антон Дяча, експерт із таргетованої реклами та маркетингу для бізнесу.
-Пишеш короткі пости в Threads (соцмережа) з метою залучення нових клієнтів.
+Пишеш короткі пости в Threads з метою залучення нових клієнтів.
 
 Твої послуги:
 - Таргетована реклама (Meta Ads, TikTok Ads)
@@ -127,54 +134,49 @@ POST_SYSTEM = """Ти — Антон Дяча, експерт із таргет�
 - Аналітика та оптимізація реклами
 - Комплексний розвиток бізнесу через digital
 
-Твій оффер: безкоштовний аудит реклами / тестовий тиждень / гарантія результату (якщо гірше — повертаємо гроші).
+Твій оффер: безкоштовний аудит реклами / тестовий тиждень / гарантія результату.
 
 Принципи написання (за Робертом Чалдіні та AIDA):
-- Починай з болю або провокаційного твердження (Увага)
-- Розкривай цінність або інсайт (Інтерес)
-- Показуй конкретний результат або соціальний доказ (Бажання)
-- Клич до дії або постав запитання (Дія)
-- Використовуй принципи: соціальний доказ, дефіцит, авторитет, взаємність
+- Починай з болю або провокаційного твердження
+- Розкривай цінність або інсайт
+- Показуй конкретний результат або соціальний доказ
+- Клич до дії або постав запитання
 
-Мова: природній мікс українська/російська (як розмовляють у пострадянських бізнес-колах)
-Стиль: жива мова, без шаблонів, як пише реальна людина в соцмережах
+Мова: природній мікс українська/російська
+Стиль: жива мова, без шаблонів
 Довжина: 3–7 речень, максимум 500 символів
-Без хештегів, без зайвих емодзі (максимум 1–2 по тексту)
-НЕ згадуй посилання на Telegram в постах — тільки у відповідях на коментарі"""
+Без хештегів, максимум 1–2 емодзі
+НЕ згадуй Telegram в постах — тільки у відповідях"""
 
 TOPICS = [
-    "Кейс: конкретний результат клієнта (витрати/ліди/CPL) з таргету. Покажи цифри без перебільшень.",
-    "Топ-3 помилки власників бізнесу в рекламі, які зливають бюджет.",
-    "Чому більшість реклами не дає лідів — розкрий головну причину та запропонуй рішення.",
-    "Оффер: безкоштовний аудит реклами. Поясни цінність, не тисни.",
-    "Як побудувати воронку, яка продає навіть вночі — короткий інсайт.",
+    "Кейс: конкретний результат клієнта (витрати/ліди/CPL) з таргету.",
+    "Топ-3 помилки власників бізнесу в рекламі.",
+    "Чому більшість реклами не дає лідів.",
+    "Оффер: безкоштовний аудит реклами.",
+    "Як побудувати воронку, яка продає навіть вночі.",
     "Аналітика в рекламі: чому без даних бізнес грає в лотерею.",
     "Запитання до аудиторії: що заважає масштабувати бізнес через рекламу?",
-    "Соціальний доказ: скільки лідів/клієнтів отримали партнери цього місяця.",
-    "Тестовий тиждень — чому це вигідно для клієнта і як це працює.",
-    "Найдорожча помилка в таргеті — неправильна аудиторія. Як знайти правильну.",
-    "Оффер з гарантією: якщо результат гірший — повертаємо гроші. Чому не боїмось.",
+    "Соціальний доказ: скільки лідів отримали партнери цього місяця.",
+    "Тестовий тиждень — чому це вигідно для клієнта.",
+    "Найдорожча помилка в таргеті — неправильна аудиторія.",
+    "Оффер з гарантією: якщо результат гірший — повертаємо гроші.",
     "Різниця між дорогою і дешевою рекламою — не в бюджеті, а в стратегії.",
 ]
 
-# ─── СИСТЕМНИЙ ПРОМПТ ДЛЯ ВІДПОВІДЕЙ ─────────────────────────────────────────
 REPLY_SYSTEM = f"""Ти — Антон Дяча, експерт із таргетованої реклами. Відповідаєш на коментарі під своїми постами в Threads.
 
-Твоя мета: кваліфікувати ліда і вивести його на особисту зустріч через Telegram.
+Твоя мета: кваліфікувати ліда і вивести його в Telegram.
 
-Правила відповідей:
-1. Перший контакт: задай 1 конкретне запитання, щоб зрозуміти бізнес і потребу людини
-   Приклади: "Який у вас бізнес/ніша?", "Ви вже пробували запускати рекламу?"
-2. Якщо людина відповіла на твоє запитання і є реальний інтерес — запропонуй продовжити в Telegram
-   Формулювання: "Напишіть мені в ТГ, домовимося на короткий дзвінок: https://t.me/anton_dyacha"
-3. На нейтральні коментарі (лайк-тексти, "клас", "вогонь") — коротка щира подяка
-4. На негатив або тролінг — ігноруй (відповідай "skip")
-5. Мова: мікс укр/рус, жива, без корпоративного стилю
-6. Відповідь: 1–3 речення максимум
+Правила:
+1. Перший контакт: задай 1 конкретне запитання
+2. Є інтерес — запропонуй Telegram: {TELEGRAM_LINK}
+3. Нейтральні — коротка подяка
+4. Негатив/тролінг — skip
+5. Мова: мікс укр/рус, жива
+6. 1–3 речення максимум
 
-Відповідай тільки текстом відповіді. Якщо не треба відповідати — напиши рівно: skip"""
+Якщо не треба — напиши рівно: skip"""
 
-# ─── СТАН: ОБРОБЛЕНІ КОМЕНТАРІ ────────────────────────────────────────────────
 def load_state():
     if STATE_FILE.exists():
         try:
@@ -186,7 +188,6 @@ def load_state():
 def save_state(state):
     STATE_FILE.write_text(json.dumps(state, indent=2, ensure_ascii=False))
 
-# ─── ПОСТИНГ ──────────────────────────────────────────────────────────────────
 def run_post(user_id):
     print(f"📝 Генерую {POSTS_PER_RUN} пости...")
     topics = random.sample(TOPICS, min(POSTS_PER_RUN, len(TOPICS)))
@@ -195,25 +196,24 @@ def run_post(user_id):
         try:
             print(f"  [{i+1}/{POSTS_PER_RUN}] Тема: {topic[:50]}...")
             text = claude(POST_SYSTEM, f"Напиши пост на тему: {topic}")
+            print(f"  💬 Текст: {text[:100]}")
             thread_id = publish_thread(user_id, text)
             print(f"  ✅ Опубліковано: {thread_id}")
-            print(f"  📄 {text[:80]}...")
             posted += 1
             if i < len(topics) - 1:
                 time.sleep(random.randint(15, 45))
         except Exception as e:
-            print(f"  ❌ Помилка посту: {e}")
+            print(f"  ❌ Помилка: {e}")
     print(f"\n✅ Опубліковано {posted}/{POSTS_PER_RUN} постів")
 
-# ─── ВІДПОВІДІ НА КОМЕНТАРІ ───────────────────────────────────────────────────
 def run_reply(user_id):
     state = load_state()
     replied_ids = set(state.get("replied", []))
     lead_stage = state.get("lead_stage", {})
 
-    print("🔍 Отримую мої пости за 24h...")
+    print("🔍 Отримую пости за 24h...")
     threads = get_my_threads(user_id)
-    print(f"  Знайдено постів: {len(threads)}")
+    print(f"  Знайдено: {len(threads)}")
 
     new_replies = 0
     for thread in threads:
@@ -221,46 +221,36 @@ def run_reply(user_id):
         replies = get_replies(tid)
         if not replies:
             continue
-        print(f"  Пост {tid}: {len(replies)} коментарів")
         for reply in replies:
             rid = reply.get("id")
             if not rid or rid in replied_ids:
                 continue
-
             username = reply.get("username", "?")
             text = reply.get("text", "").strip()
             if not text:
                 continue
-
             stage = lead_stage.get(rid, 0)
             print(f"    💬 @{username}: {text[:60]}")
-
             try:
-                context = f"Коментар від @{username}: \"{text}\"\nСтадія розмови: {stage} (0=перший контакт, 1=вже запитав про бізнес)"
+                context = f"Коментар від @{username}: \"{text}\"\nСтадія: {stage}"
                 response = claude(REPLY_SYSTEM, context, max_tokens=200)
-
                 if response.strip().lower() == "skip":
-                    print(f"    ⏭️  Пропускаємо")
                     replied_ids.add(rid)
                     continue
-
-                reply_id = reply_to_thread(user_id, rid, response)
-                print(f"    ✅ Відповів: {response[:60]}...")
-
+                reply_to_thread(user_id, rid, response)
+                print(f"    ✅ {response[:60]}")
                 replied_ids.add(rid)
                 lead_stage[rid] = stage + 1
                 new_replies += 1
                 time.sleep(random.randint(10, 25))
-
             except Exception as e:
-                print(f"    ❌ Помилка відповіді: {e}")
+                print(f"    ❌ {e}")
 
     state["replied"] = list(replied_ids)
     state["lead_stage"] = lead_stage
     save_state(state)
-    print(f"\n✅ Надіслано відповідей: {new_replies}")
+    print(f"\n✅ Надіслано: {new_replies}")
 
-# ─── MAIN ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     if not THREADS_TOKEN:
         print("❌ THREADS_ACCESS_TOKEN не задано"); sys.exit(1)
