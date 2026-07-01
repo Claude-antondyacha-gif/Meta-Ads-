@@ -1,7 +1,9 @@
 {
-  "top_topics": [],
+  "top_topics": [
+    "opinion"
+  ],
   "avoid_topics": [],
   "warm_contacts": {},
   "total_posts": 1,
-  "last_updated": null
+  "last_updated": "2026-07-01T10:49:05.630991+00:00"
 }
