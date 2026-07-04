@@ -1,10 +1,14 @@
 {
   "top_topics": [
     "lifehack",
-    "opinion"
+    "opinion",
+    "offer"
   ],
-  "avoid_topics": [],
+  "avoid_topics": [
+    "offer",
+    "engagement"
+  ],
   "warm_contacts": {},
   "total_posts": 4,
-  "last_updated": "2026-07-03T08:37:52.224373+00:00"
+  "last_updated": "2026-07-04T07:30:35.800466+00:00"
 }
