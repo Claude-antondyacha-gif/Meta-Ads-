@@ -5,10 +5,10 @@
     "offer"
   ],
   "avoid_topics": [
-    "offer",
-    "engagement"
+    "engagement",
+    "unknown"
   ],
   "warm_contacts": {},
-  "total_posts": 5,
-  "last_updated": "2026-07-04T07:30:35.800466+00:00"
+  "total_posts": 6,
+  "last_updated": "2026-07-05T08:23:29.601899+00:00"
 }
