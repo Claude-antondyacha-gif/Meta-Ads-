@@ -578,10 +578,16 @@ def run_post(user_id):
                 if not bm_prompt:
                     continue
                 print(f"  [{i+1}/{len(selected)}] [bm_case] Генерую кейс з BM даних...")
-                text = claude(post_system, bm_prompt)
+                text = claude(post_system, bm_prompt + "\n\nВАЖЛИВО: максимум 480 символів. Без markdown, без заголовків (#), без зірочок (**). Тільки звичайний текст.")
             else:
                 print(f"  [{i+1}/{len(selected)}] [{topic['category']}] {topic['text'][:50]}...")
-                text = claude(post_system, f"Напиши пост на тему: {topic['text']}")
+                text = claude(post_system, f"Напиши пост на тему: {topic['text']}"
+                         + "\n\nВАЖЛИВО: максимум 480 символів. Без markdown, без заголовків (#), без зірочок (**). Тільки звичайний текст.")
+            # Очищаємо markdown і обрізаємо до 490 символів
+            import re
+            text = re.sub(r'^#+\s+.*\n?', '', text, flags=re.MULTILINE)  # прибираємо заголовки
+            text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # прибираємо bold
+            text = text.strip()[:490]
             print(f"  💬 {text[:100]}...")
             thread_id = publish_thread(user_id, text)
             print(f"  ✅ Опубліковано: {thread_id}")
