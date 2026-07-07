@@ -33,6 +33,7 @@ KB_FILE        = Path(__file__).parent / "knowledge_base.json"
 POST_MODE      = "--post"      in sys.argv
 REPLY_MODE     = "--reply"     in sys.argv
 ANALYTICS_MODE = "--analytics" in sys.argv
+FORCE_MODE     = "--force"     in sys.argv
 
 META_TOKEN     = _get("META_ACCESS_TOKEN")
 META_BASE      = "https://graph.facebook.com/v21.0"
@@ -540,7 +541,7 @@ def run_analytics(user_id):
 # ─── РЕЖИМ: ПОСТИНГ ───────────────────────────────────────────────────────────
 def run_post(user_id):
     # 75% шанс публікувати — щоб пости виходили нерівномірно, як жива людина
-    if random.random() > 0.75:
+    if not FORCE_MODE and random.random() > 0.75:
         print("⏭️  Пропускаємо цей запуск (живий режим)")
         return
 
