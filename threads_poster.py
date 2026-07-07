@@ -33,8 +33,104 @@ KB_FILE        = Path(__file__).parent / "knowledge_base.json"
 POST_MODE      = "--post"      in sys.argv
 REPLY_MODE     = "--reply"     in sys.argv
 ANALYTICS_MODE = "--analytics" in sys.argv
+FORCE_MODE     = "--force"     in sys.argv
+
+META_TOKEN     = _get("META_ACCESS_TOKEN")
+META_BASE      = "https://graph.facebook.com/v21.0"
+BM_AD_ACCOUNTS = [
+    {"id": "act_445844598148716",  "niche": "агентство нерухомості в Іспанії"},
+    {"id": "act_1179918680004739", "niche": "DOT ES"},
+    {"id": "act_1074551967837555", "niche": "DOT nashi"},
+]
 
 POSTS_PER_RUN  = 1
+
+# ─── META BM API ──────────────────────────────────────────────────────────────
+def meta_get(path, params=None):
+    p = urllib.parse.urlencode({**(params or {}), "access_token": META_TOKEN})
+    req = urllib.request.Request(
+        f"{META_BASE}/{path}?{p}",
+        headers={"User-Agent": "Mozilla/5.0"})
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"Meta HTTP {e.code}: {body}")
+
+def fetch_bm_insights(account_id, days=30):
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        data = meta_get(f"{account_id}/insights", {
+            "fields": "spend,impressions,clicks,ctr,cpc,cpm,actions,cost_per_action_type",
+            "time_range": json.dumps({"since": since, "until": today}),
+            "level": "account",
+        })
+        items = data.get("data", [])
+        if not items:
+            return None
+        row = items[0]
+        # Витягуємо leads з actions
+        leads = 0
+        cpl = 0.0
+        for a in row.get("actions", []):
+            if a.get("action_type") in ("lead", "offsite_conversion.fb_pixel_lead"):
+                leads += int(a.get("value", 0))
+        for a in row.get("cost_per_action_type", []):
+            if a.get("action_type") in ("lead", "offsite_conversion.fb_pixel_lead"):
+                cpl = float(a.get("value", 0))
+        return {
+            "spend": float(row.get("spend", 0)),
+            "impressions": int(row.get("impressions", 0)),
+            "clicks": int(row.get("clicks", 0)),
+            "ctr": float(row.get("ctr", 0)),
+            "cpc": float(row.get("cpc", 0)),
+            "cpm": float(row.get("cpm", 0)),
+            "leads": leads,
+            "cpl": cpl,
+            "period_days": days,
+        }
+    except Exception as e:
+        print(f"  ⚠️  BM insights error {account_id}: {e}")
+        return None
+
+def fetch_bm_top_campaigns(account_id, days=30, limit=3):
+    since = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        data = meta_get(f"{account_id}/campaigns", {
+            "fields": "id,name,status",
+            "limit": "30",
+        })
+        campaigns = [c for c in data.get("data", []) if c.get("status") == "ACTIVE"]
+        results = []
+        for c in campaigns[:10]:
+            cid = c["id"]
+            ins = meta_get(f"{cid}/insights", {
+                "fields": "spend,impressions,clicks,ctr,actions,cost_per_action_type",
+                "time_range": json.dumps({"since": since, "until": today}),
+            })
+            rows = ins.get("data", [])
+            if not rows:
+                continue
+            row = rows[0]
+            leads = sum(int(a.get("value", 0)) for a in row.get("actions", [])
+                        if a.get("action_type") in ("lead", "offsite_conversion.fb_pixel_lead"))
+            cpl = next((float(a.get("value", 0)) for a in row.get("cost_per_action_type", [])
+                        if a.get("action_type") in ("lead", "offsite_conversion.fb_pixel_lead")), 0.0)
+            results.append({
+                "name": c["name"],
+                "spend": float(row.get("spend", 0)),
+                "leads": leads,
+                "cpl": cpl,
+                "ctr": float(row.get("ctr", 0)),
+            })
+        results.sort(key=lambda x: x["leads"], reverse=True)
+        return results[:limit]
+    except Exception as e:
+        print(f"  ⚠️  Campaigns error {account_id}: {e}")
+        return []
 
 # ─── THREADS API ──────────────────────────────────────────────────────────────
 def t_get(path, params=None):
@@ -179,70 +275,125 @@ def save_state(state):
 # ─── АНАЛІТИЧНИЙ КОНТЕКСТ ДЛЯ ПОСТІВ ─────────────────────────────────────────
 def build_analytics_context():
     analytics = load_analytics()
-    if not analytics:
-        return ""
+    kb = load_kb()
+    lines = []
 
     posts = list(analytics.values())
-    if not posts:
-        return ""
+    if posts:
+        sorted_posts = sorted(posts, key=lambda x: x.get("views", 0), reverse=True)
+        top3 = sorted_posts[:3]
+        flop3 = sorted_posts[-3:] if len(sorted_posts) > 3 else []
 
-    sorted_posts = sorted(posts, key=lambda x: x.get("views", 0), reverse=True)
-    top3 = sorted_posts[:3]
-    flop3 = sorted_posts[-3:] if len(sorted_posts) > 3 else []
+        lines.append("📊 АНАЛІТИКА Threads (що залітає):")
+        for p in top3:
+            lines.append(f"  ✅ views={p.get('views',0)} replies={p.get('replies',0)} — [{p.get('category','?')}] {p.get('text','')[:60]}")
+        if flop3:
+            lines.append("📉 Що не залітає:")
+            for p in flop3:
+                lines.append(f"  ❌ views={p.get('views',0)} — [{p.get('category','?')}]")
 
-    lines = ["📊 АНАЛІТИКА (що залітає):"]
-    for p in top3:
-        lines.append(f"  ✅ views={p.get('views',0)} likes={p.get('likes',0)} — тема: {p.get('category','?')} | {p.get('text','')[:60]}")
+    # BM кейси
+    bm_cases = kb.get("bm_cases", [])
+    if bm_cases:
+        lines.append("\n💼 РЕАЛЬНІ КЕЙСИ З BM (для постів типу 'case'):")
+        for c in bm_cases:
+            lines.append(
+                f"  Ніша: {c['niche']} | Витрати: €{c['spend']:.0f}/міс | "
+                f"Ліди: {c['leads']} | CPL: €{c['cpl']:.2f} | CTR: {c['ctr']:.2f}%"
+            )
 
-    if flop3:
-        lines.append("📉 Що не залітає:")
-        for p in flop3:
-            lines.append(f"  ❌ views={p.get('views',0)} — тема: {p.get('category','?')}")
+    return "\n".join(lines) if lines else ""
 
-    return "\n".join(lines)
+def get_bm_case_prompt():
+    kb = load_kb()
+    cases = kb.get("bm_cases", [])
+    if not cases:
+        return None
+    case = random.choice(cases)
+    top_c = case.get("top_campaigns", [])
+    top_str = ""
+    if top_c:
+        best = top_c[0]
+        top_str = f"Найкраща кампанія: {best['leads']} лідів, CPL €{best['cpl']:.2f}, CTR {best['ctr']:.2f}%"
+    return (
+        f"Напиши пост-кейс (формат: ніша + результат, без назви клієнта).\n"
+        f"Ніша: {case['niche']}\n"
+        f"Дані за 30 днів: витрати €{case['spend']:.0f}, ліди {case['leads']}, "
+        f"CPL €{case['cpl']:.2f}, CTR {case['ctr']:.2f}%\n"
+        f"{top_str}\n"
+        f"Формат посту: '🏠 [Ніша]\\nБуло / Стало' або 'Кейс: [ніша] — [головна цифра]'.\n"
+        f"Стиль: конкретні числа, прогрів до себе як до експерта, без назви клієнта."
+    )
+
 
 # ─── ТЕМИ ПОСТІВ ──────────────────────────────────────────────────────────────
 TOPICS = [
-    # ЛІДГЕН / ОФФЕР
-    {"text": "Кейс: конкретний результат клієнта (витрати/ліди/CPL) з таргету. Цифри без перебільшень.", "category": "case"},
-    {"text": "Топ-3 помилки власників бізнесу в рекламі, які зливають бюджет.", "category": "tips"},
-    {"text": "Чому більшість реклами не дає лідів — головна причина і рішення.", "category": "education"},
-    {"text": "Оффер: безкоштовний аудит реклами. Поясни цінність, не тисни.", "category": "offer"},
-    {"text": "Різниця між дорогою і дешевою рекламою — не в бюджеті, а в стратегії.", "category": "education"},
-    {"text": "Оффер з гарантією: якщо результат гірший — повертаємо гроші.", "category": "offer"},
+    # HOT TAKES / ПРОВОКАЦІЯ — найбільше replies за даними алгоритму Threads 2026
+    {"text": "Непопулярна думка: більшість таргетологів продають ліди, а не результат. Різниця величезна — поясни чому.", "category": "opinion"},
+    {"text": "Advantage+ від Meta — довіряти алгоритму чи контролювати самому? Моя чесна позиція після тестів.", "category": "opinion"},
+    {"text": "Провокація: агентства які обіцяють гарантований ROAS — брехуть. Ось чому.", "category": "opinion"},
+    {"text": "Незгода з популярною думкою: 'більший бюджет = більше лідів' — це міф. Що насправді важливо.", "category": "opinion"},
+    {"text": "Чесно: iOS privacy вбила атрибуцію і більшість агенцій досі це приховують від клієнтів.", "category": "opinion"},
 
-    # ОСОБИСТІСТЬ / ОХВАТ
+    # КЕЙСИ З НІШЕЮ — прогрів через соціальний доказ
+    {"text": "Кейс з реальними цифрами: ніша клієнта + витрати/ліди/CPL. Без назви компанії, тільки результат.", "category": "case"},
+    {"text": "Агентство нерухомості в Іспанії: як ми знизили CPL з ринкових 50 EUR до 8-15 EUR — що зробили.", "category": "case"},
+    {"text": "Кейс ecommerce: чому збільшення бюджету на 50% не дало +50% продажів і що ми змінили.", "category": "case"},
+
+    # ОСОБИСТІСТЬ / ПОМИЛКИ — викликають емпатію і replies
     {"text": "Особиста помилка яку зробив на початку кар'єри в рекламі і що з цього виніс.", "category": "personal"},
-    {"text": "Один лайфак по бізнесу або рекламі який здивував мене цього тижня.", "category": "lifehack"},
-    {"text": "Чесний апдейт: що зараз роблю, над чим працюю, що вчу.", "category": "update"},
-    {"text": "Провокаційна думка про ринок реклами або digital маркетинг в Іспанії/Україні.", "category": "opinion"},
-    {"text": "Що мене дратує в клієнтах або партнерах — чесно і без фільтрів.", "category": "personal"},
-    {"text": "Запитання до аудиторії: що заважає масштабувати бізнес через рекламу?", "category": "engagement"},
-    {"text": "Неочевидна порада для власників малого бізнесу — коротко і по суті.", "category": "tips"},
-    {"text": "Що читаю / дивлюсь / слухаю зараз і чому рекомендую.", "category": "personal"},
-    {"text": "Мій погляд на тренд у digital маркетингу який всі обговорюють.", "category": "opinion"},
+    {"text": "Клієнт якого я втратив — чесна історія без прикрашань і що я з цього зрозумів.", "category": "personal"},
+    {"text": "Що мене дратує в ринку таргетованої реклами — чесно і без фільтрів.", "category": "personal"},
+    {"text": "Чесний апдейт: що зараз тестую, що не зашло, що здивувало в результатах.", "category": "update"},
+
+    # ЛАЙФАКИ / ІНСАЙТИ — корисний контент зупиняє скролінг
+    {"text": "Один неочевидний лайфак по Meta Ads який дав несподіваний результат — коротко і по суті.", "category": "lifehack"},
+    {"text": "Скільки реально коштує лід в різних нішах в Іспанії/Україні — цифри з моїх кабінетів.", "category": "lifehack"},
+    {"text": "Різниця між таргетологом і маркетологом — чому це важливо для бізнесу.", "category": "education"},
+    {"text": "Що змінилось в Meta Ads після iOS privacy і як ми адаптували стратегії клієнтів.", "category": "education"},
+
+    # ЗАЛУЧЕННЯ — запитання що провокують відповіді
+    {"text": "Відкрите запитання: яку найбільшу помилку в рекламі ви бачили у свого підрядника?", "category": "engagement"},
+    {"text": "Запитання до власників бізнесу: ви знаєте свій реальний CPL і ROAS чи просто вірите підряднику?", "category": "engagement"},
+
+    # ОФФЕР — м'який, через цінність
+    {"text": "Оффер через кейс: безкоштовний аудит — що я перевіряю за 20 хвилин і що зазвичай знаходжу.", "category": "offer"},
 ]
 
 # ─── ПРОМПТИ ──────────────────────────────────────────────────────────────────
 def build_post_system():
     analytics_ctx = build_analytics_context()
-    base = """Ти — Антон Дяча, експерт із таргетованої реклами і digital маркетингу.
-Пишеш пости в Threads (соцмережа). Твоя мета: збирати охват на особистих постах і залучати клієнтів через корисний контент.
+    base = """Ти — Антон Дяча, таргетолог і експерт з Meta Ads / digital маркетингу.
+Пишеш пости в Threads. Головна мета: прогріти аудиторію до себе як до експерта. Лідген — другорядний.
 
-Твої послуги: Meta Ads, TikTok Ads, маркетингові воронки, аналітика.
-Оффер: безкоштовний аудит реклами / тестовий тиждень / гарантія результату.
+Послуги: Meta Ads, TikTok Ads, маркетингові воронки, аналітика.
+Клієнти: агентства нерухомості в Іспанії, ecommerce, бізнеси в Україні/Іспанії.
 
-Принципи (Чалдіні + AIDA):
-- Починай з болю, провокації або особистої історії
-- Розкривай цінність або інсайт
-- Конкретний результат або соціальний доказ
-- Заклик до дії або відкрите запитання
+АЛГОРИТМ THREADS 2026 — що просувається:
+- Replies важливіші за лайки → провокуй дискусію, задавай запитання
+- Перші 60 хвилин критичні → перший рядок має зупинити скролінг
+- Оригінальний нативний контент (не перепости з інших платформ)
+- Відповідь на коментарі підвищує охват на 42%
 
-Мова: природній мікс українська/російська (як розмовляють у бізнес-колах)
-Стиль: жива мова, як пише реальна людина — без шаблонів і корпоративщини
-Довжина: 3–6 речень, максимум 500 символів
-Без хештегів, максимум 1–2 емодзі
-НЕ згадуй Telegram в постах — тільки у відповідях на коментарі"""
+ФОРМАТИ що залітають (по даних Buffer/Sprout 2026):
+1. Hot take / непопулярна думка → максимум replies
+2. "Я помилявся коли думав що..." → емпатія + навчання
+3. Цифра яка дивує + коротке пояснення → зупиняє скролінг
+4. Кейс: ніша клієнта + результат (без назви компанії)
+5. Відкрите запитання до аудиторії → провокує відповіді
+
+СТРУКТУРА посту:
+- Перший рядок (до 280 символів) = хук — провокація, цифра або несподівана думка
+- 2-3 речення розкриття
+- Фінал = відкрите запитання АБО інсайт що залишається в голові
+
+ПРАВИЛА:
+- Мова: живий мікс укр/рус, як у бізнес-чаті
+- 3-5 речень, максимум 400 символів
+- Без хештегів, максимум 1-2 емодзі
+- Ніяких назв клієнтів — тільки "ніша + гео" (напр. "агентство нерухомості в Іспанії")
+- НЕ згадуй Telegram в постах — тільки у відповідях на коментарі
+- Уникай корпоративщини, шаблонів, загальних фраз"""
 
     if analytics_ctx:
         base += f"\n\n{analytics_ctx}\nАдаптуй стиль і теми на основі цієї аналітики."
@@ -267,6 +418,61 @@ REPLY_SYSTEM = f"""Ти — Міла, AI-асистент Антона Дячі.
 Відповідай тільки текстом. Якщо не треба відповідати — напиши рівно: skip"""
 
 # ─── РЕЖИМ: АНАЛІТИКА ─────────────────────────────────────────────────────────
+def run_bm_analytics(kb):
+    if not META_TOKEN:
+        print("  ⚠️  META_ACCESS_TOKEN не задано, пропускаємо BM аналітику")
+        return kb
+
+    print("\n💼 Збираю дані BM...")
+    bm_data = kb.get("bm_accounts", {})
+
+    for account in BM_AD_ACCOUNTS:
+        acc_id = account["id"]
+        niche = account["niche"]
+        print(f"  📊 {niche} ({acc_id})...")
+
+        insights = fetch_bm_insights(acc_id, days=30)
+        if not insights:
+            continue
+
+        top_campaigns = fetch_bm_top_campaigns(acc_id, days=30)
+
+        bm_data[acc_id] = {
+            "niche": niche,
+            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "insights_30d": insights,
+            "top_campaigns": top_campaigns,
+        }
+
+        spend = insights["spend"]
+        leads = insights["leads"]
+        cpl = insights["cpl"]
+        ctr = insights["ctr"]
+        print(f"    ✅ Витрати: €{spend:.0f} | Ліди: {leads} | CPL: €{cpl:.2f} | CTR: {ctr:.2f}%")
+        if top_campaigns:
+            print(f"    🏆 Топ кампанія: {top_campaigns[0]['name'][:50]} — {top_campaigns[0]['leads']} лідів")
+
+    kb["bm_accounts"] = bm_data
+    kb["bm_last_updated"] = datetime.now(timezone.utc).isoformat()
+
+    # Генеруємо готові кейси для постів
+    cases = []
+    for acc_id, acc_data in bm_data.items():
+        ins = acc_data.get("insights_30d", {})
+        niche = acc_data["niche"]
+        if ins.get("leads", 0) > 0 and ins.get("cpl", 0) > 0:
+            cases.append({
+                "niche": niche,
+                "spend": ins["spend"],
+                "leads": ins["leads"],
+                "cpl": ins["cpl"],
+                "ctr": ins["ctr"],
+                "top_campaigns": acc_data.get("top_campaigns", []),
+            })
+    kb["bm_cases"] = cases
+    print(f"\n  📝 Готових кейсів для постів: {len(cases)}")
+    return kb
+
 def run_analytics(user_id):
     print("📊 Збираю аналітику постів за останні 7 днів...")
     analytics = load_analytics()
@@ -282,6 +488,7 @@ def run_analytics(user_id):
         if not insights:
             continue
 
+        # Якщо пост вже є в аналітиці — оновлюємо метрики
         existing = analytics.get(pid, {})
         analytics[pid] = {
             **existing,
@@ -300,6 +507,7 @@ def run_analytics(user_id):
 
     save_analytics(analytics)
 
+    # Оновлюємо knowledge base — топ теми
     all_posts = list(analytics.values())
     if all_posts:
         by_views = sorted(all_posts, key=lambda x: x.get("views", 0), reverse=True)
@@ -312,6 +520,7 @@ def run_analytics(user_id):
             top_categories[cat]["views"] += v
             top_categories[cat]["count"] += 1
 
+        # Середній охват по категорії
         cat_avg = {k: v["views"] / v["count"] for k, v in top_categories.items()}
         sorted_cats = sorted(cat_avg.items(), key=lambda x: x[1], reverse=True)
 
@@ -325,10 +534,14 @@ def run_analytics(user_id):
         print(f"  🏆 Топ категорії: {kb['top_topics']}")
         print(f"  📉 Уникати: {kb['avoid_topics']}")
 
+    # BM аналітика
+    kb = run_bm_analytics(kb)
+    save_kb(kb)
+
 # ─── РЕЖИМ: ПОСТИНГ ───────────────────────────────────────────────────────────
 def run_post(user_id):
     # 75% шанс публікувати — щоб пости виходили нерівномірно, як жива людина
-    if random.random() > 0.75:
+    if not FORCE_MODE and random.random() > 0.75:
         print("⏭️  Пропускаємо цей запуск (живий режим)")
         return
 
@@ -343,10 +556,15 @@ def run_post(user_id):
         if boosted:
             personal = boosted + personal
 
-    # Кожен 3-й пост — лідген, решта — охват/особистість
+    # Кожен 5-й пост — кейс з реальних BM даних, кожен 3-й — лідген, решта — охват
     kb_posts = kb.get("total_posts", 0)
-    pool = leadgen if (kb_posts % 3 == 2) else personal
-    selected = random.sample(pool, min(POSTS_PER_RUN, len(pool)))
+    use_bm_case = (kb_posts % 5 == 4) and bool(kb.get("bm_cases"))
+    if use_bm_case:
+        pool = leadgen  # буде перевизначено нижче
+        selected = [{"text": "__BM_CASE__", "category": "case"}]
+    else:
+        pool = leadgen if (kb_posts % 3 == 2) else personal
+        selected = random.sample(pool, min(POSTS_PER_RUN, len(pool)))
 
     post_system = build_post_system()
     analytics = load_analytics()
@@ -355,12 +573,26 @@ def run_post(user_id):
     posted = 0
     for i, topic in enumerate(selected):
         try:
-            print(f"  [{i+1}/{len(selected)}] [{topic['category']}] {topic['text'][:50]}...")
-            text = claude(post_system, f"Напиши пост на тему: {topic['text']}")
+            if topic["text"] == "__BM_CASE__":
+                bm_prompt = get_bm_case_prompt()
+                if not bm_prompt:
+                    continue
+                print(f"  [{i+1}/{len(selected)}] [bm_case] Генерую кейс з BM даних...")
+                text = claude(post_system, bm_prompt + "\n\nВАЖЛИВО: максимум 480 символів. Без markdown, без заголовків (#), без зірочок (**). Тільки звичайний текст.")
+            else:
+                print(f"  [{i+1}/{len(selected)}] [{topic['category']}] {topic['text'][:50]}...")
+                text = claude(post_system, f"Напиши пост на тему: {topic['text']}"
+                         + "\n\nВАЖЛИВО: максимум 480 символів. Без markdown, без заголовків (#), без зірочок (**). Тільки звичайний текст.")
+            # Очищаємо markdown і обрізаємо до 490 символів
+            import re
+            text = re.sub(r'^#+\s+.*\n?', '', text, flags=re.MULTILINE)  # прибираємо заголовки
+            text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)  # прибираємо bold
+            text = text.strip()[:490]
             print(f"  💬 {text[:100]}...")
             thread_id = publish_thread(user_id, text)
             print(f"  ✅ Опубліковано: {thread_id}")
 
+            # Зберігаємо пост в аналітику (метрики з'являться пізніше)
             analytics[thread_id] = {
                 "id": thread_id,
                 "text": text[:200],
@@ -410,6 +642,7 @@ def run_reply(user_id):
             if not text:
                 continue
 
+            # Рахуємо активність контакту
             warm_contacts[username] = warm_contacts.get(username, 0) + 1
             warmth = warm_contacts[username]
             stage = lead_stage.get(username, 0)
