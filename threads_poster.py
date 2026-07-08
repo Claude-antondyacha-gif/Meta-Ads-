@@ -21,10 +21,11 @@ def _load_env():
 _env = _load_env()
 def _get(k): return os.environ.get(k) or _env.get(k, "")
 
-THREADS_TOKEN  = _get("THREADS_ACCESS_TOKEN")
-ANTHROPIC_KEY  = _get("ANTHROPIC_API_KEY")
-TELEGRAM_LINK  = "https://t.me/anton_dyacha"
-THREADS_BASE   = "https://graph.threads.net/v1.0"
+THREADS_TOKEN    = _get("THREADS_ACCESS_TOKEN")
+ANTHROPIC_KEY    = _get("ANTHROPIC_API_KEY")
+TELEGRAM_LINK    = "https://t.me/anton_dyacha"
+TELEGRAM_CHANNEL = "https://t.me/anton_marketingg"
+THREADS_BASE     = "https://graph.threads.net/v1.0"
 
 STATE_FILE     = Path(__file__).parent / "replied_comments.json"
 ANALYTICS_FILE = Path(__file__).parent / "posts_analytics.json"
@@ -378,9 +379,9 @@ TOPICS = [
 ]
 
 # ─── ПРОМПТИ ──────────────────────────────────────────────────────────────────
-def build_post_system():
+def build_post_system(with_channel_cta=False):
     analytics_ctx = build_analytics_context()
-    base = """Ти — Антон Дяча, таргетолог і експерт з Meta Ads / digital маркетингу.
+    base = f"""Ти — Антон Дяча, таргетолог і експерт з Meta Ads / digital маркетингу.
 Пишеш пости в Threads. Головна мета: прогріти аудиторію до себе як до експерта. Лідген — другорядний.
 
 Послуги: Meta Ads, TikTok Ads, маркетингові воронки, аналітика.
@@ -400,7 +401,7 @@ def build_post_system():
 5. Відкрите запитання до аудиторії → провокує відповіді
 
 СТРУКТУРА посту:
-- Перший рядок (до 280 символів) = хук — провокація, цифра або несподівана думка
+- Перший рядок = хук — провокація, цифра або несподівана думка
 - 2-3 речення розкриття
 - Фінал = відкрите запитання АБО інсайт що залишається в голові
 
@@ -408,9 +409,19 @@ def build_post_system():
 - Мова: живий мікс укр/рус, як у бізнес-чаті
 - 3-5 речень, максимум 400 символів
 - Без хештегів, максимум 1-2 емодзі
-- Ніяких назв клієнтів — тільки "ніша + гео" (напр. "агентство нерухомості в Іспанії")
-- НЕ згадуй Telegram в постах — тільки у відповідях на коментарі
+- Ніяких назв клієнтів — тільки "ніша + гео"
 - Уникай корпоративщини, шаблонів, загальних фраз"""
+
+    if with_channel_cta:
+        base += f"""
+
+CTA НА КАНАЛ (додай органічно в кінці посту):
+У мене є Telegram-канал "Личный дневник маркетолога" де я публікую розбори, кейси і інсайти детальніше.
+Встав CTA природно — одним реченням, без тиску. Варіанти:
+- "Детальніше розбираю у своєму тг-каналі: {TELEGRAM_CHANNEL}"
+- "Веду канал про рекламу без води: {TELEGRAM_CHANNEL}"
+- "Більше таких розборів у моєму тг: {TELEGRAM_CHANNEL}"
+Обери той що підходить до теми посту або придумай схожий."""
 
     if analytics_ctx:
         base += f"\n\n{analytics_ctx}\nАдаптуй стиль і теми на основі цієї аналітики."
@@ -610,7 +621,9 @@ def run_post(user_id):
 
         selected = random.sample(pool, min(POSTS_PER_RUN, len(pool)))
 
-    post_system = build_post_system()
+    # Кожен 4-й пост — з CTA на Telegram-канал
+    with_channel_cta = (kb_posts % 4 == 3)
+    post_system = build_post_system(with_channel_cta=with_channel_cta)
     analytics = load_analytics()
 
     print(f"📝 Генерую {len(selected)} пости...")
