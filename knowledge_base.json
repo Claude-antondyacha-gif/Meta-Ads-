@@ -2,7 +2,7 @@
   "top_topics": [],
   "avoid_topics": [],
   "warm_contacts": {},
-  "total_posts": 0,
+  "total_posts": 1,
   "last_updated": null,
   "psychology_frameworks": {
     "cialdini_influence": {
@@ -62,5 +62,6 @@
         "strong": "Твій конкурент щойно отримав 47 лідів по €8. Ти заплатив за той самий результат €52. Різниця — не бюджет, не ніша. Одне налаштування в кабінеті. Ти перевіряв останні 30 днів?"
       }
     }
-  }
+  },
+  "last_category": "opinion"
 }
