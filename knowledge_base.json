@@ -1,9 +1,11 @@
 {
-  "top_topics": [],
+  "top_topics": [
+    "unknown"
+  ],
   "avoid_topics": [],
   "warm_contacts": {},
-  "total_posts": 3,
-  "last_updated": null,
+  "total_posts": 30,
+  "last_updated": "2026-07-09T09:00:59.661055+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -63,5 +65,78 @@
       }
     }
   },
-  "last_category": "case"
+  "last_category": "case",
+  "bm_accounts": {
+    "act_445844598148716": {
+      "niche": "агентство нерухомості в Іспанії",
+      "last_updated": "2026-07-09T09:01:05.534898+00:00",
+      "insights_30d": {
+        "spend": 2165.36,
+        "impressions": 304353,
+        "clicks": 11358,
+        "ctr": 3.731851,
+        "cpc": 0.190646,
+        "cpm": 7.114633,
+        "leads": 173,
+        "cpl": 15.921765,
+        "period_days": 30
+      },
+      "top_campaigns": [
+        {
+          "name": "SNAP - TOF -  Costa-Blanca - 15.06  - eng ( Нідерланди )",
+          "spend": 303.27,
+          "leads": 36,
+          "cpl": 8.424167,
+          "ctr": 3.881298
+        },
+        {
+          "name": "SNAP - TOF - 07.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина, Чехія, Бельгия ) )",
+          "spend": 50.75,
+          "leads": 5,
+          "cpl": 10.15,
+          "ctr": 1.906578
+        },
+        {
+          "name": "SNAP - MOF  - 06.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша )",
+          "spend": 33.1,
+          "leads": 2,
+          "cpl": 16.55,
+          "ctr": 1.917614
+        }
+      ]
+    }
+  },
+  "bm_last_updated": "2026-07-09T09:01:06.074125+00:00",
+  "bm_cases": [
+    {
+      "niche": "агентство нерухомості в Іспанії",
+      "spend": 2165.36,
+      "leads": 173,
+      "cpl": 15.921765,
+      "ctr": 3.731851,
+      "top_campaigns": [
+        {
+          "name": "SNAP - TOF -  Costa-Blanca - 15.06  - eng ( Нідерланди )",
+          "spend": 303.27,
+          "leads": 36,
+          "cpl": 8.424167,
+          "ctr": 3.881298
+        },
+        {
+          "name": "SNAP - TOF - 07.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина, Чехія, Бельгия ) )",
+          "spend": 50.75,
+          "leads": 5,
+          "cpl": 10.15,
+          "ctr": 1.906578
+        },
+        {
+          "name": "SNAP - MOF  - 06.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша )",
+          "spend": 33.1,
+          "leads": 2,
+          "cpl": 16.55,
+          "ctr": 1.917614
+        }
+      ]
+    }
+  ]
 }
