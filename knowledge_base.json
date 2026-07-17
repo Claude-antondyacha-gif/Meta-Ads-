@@ -5,12 +5,12 @@
     "education"
   ],
   "avoid_topics": [
-    "education",
-    "engagement"
+    "personal",
+    "education"
   ],
   "warm_contacts": {},
   "total_posts": 129,
-  "last_updated": "2026-07-16T21:55:52.216188+00:00",
+  "last_updated": "2026-07-17T21:41:45.809559+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -74,72 +74,72 @@
   "bm_accounts": {
     "act_445844598148716": {
       "niche": "агентство нерухомості в Іспанії",
-      "last_updated": "2026-07-16T21:55:56.651873+00:00",
+      "last_updated": "2026-07-17T21:41:50.963076+00:00",
       "insights_30d": {
-        "spend": 2909.44,
-        "impressions": 463181,
-        "clicks": 14244,
-        "ctr": 3.075256,
-        "cpc": 0.204257,
-        "cpm": 6.281432,
-        "leads": 121,
-        "cpl": 24.044959,
+        "spend": 2940.64,
+        "impressions": 476465,
+        "clicks": 14356,
+        "ctr": 3.013023,
+        "cpc": 0.204837,
+        "cpm": 6.171786,
+        "leads": 120,
+        "cpl": 24.505333,
         "period_days": 30
       },
       "top_campaigns": [
         {
-          "name": "SNAP - MOF  - 06.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша )",
-          "spend": 186.35,
-          "leads": 8,
-          "cpl": 23.29375,
-          "ctr": 1.535857
+          "name": "SNAP - TOF -  Costa-Blanca - 15.06  - eng ( Нідерланди )",
+          "spend": 397.18,
+          "leads": 58,
+          "cpl": 6.847931,
+          "ctr": 3.913251
         },
         {
-          "name": "SNAP - TOF - 15.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина, Чехія, Бельгия )",
-          "spend": 35.33,
-          "leads": 2,
-          "cpl": 17.665,
-          "ctr": 1.885014
+          "name": "SNAP - TOF - 15.06  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина )",
+          "spend": 326.74,
+          "leads": 20,
+          "cpl": 16.337,
+          "ctr": 2.418884
         },
         {
-          "name": "SNAP - TOF -  Costa-Blanca - 15.07  - eng",
-          "spend": 38.24,
-          "leads": 2,
-          "cpl": 19.12,
-          "ctr": 2.579132
+          "name": "SNAP - INV -  - TOF  - 17.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша, Австрия )",
+          "spend": 19.17,
+          "leads": 0,
+          "cpl": 0.0,
+          "ctr": 1.415701
         }
       ]
     }
   },
-  "bm_last_updated": "2026-07-16T21:55:57.133384+00:00",
+  "bm_last_updated": "2026-07-17T21:41:51.454660+00:00",
   "bm_cases": [
     {
       "niche": "агентство нерухомості в Іспанії",
-      "spend": 2909.44,
-      "leads": 121,
-      "cpl": 24.044959,
-      "ctr": 3.075256,
+      "spend": 2940.64,
+      "leads": 120,
+      "cpl": 24.505333,
+      "ctr": 3.013023,
       "top_campaigns": [
         {
-          "name": "SNAP - MOF  - 06.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша )",
-          "spend": 186.35,
-          "leads": 8,
-          "cpl": 23.29375,
-          "ctr": 1.535857
+          "name": "SNAP - TOF -  Costa-Blanca - 15.06  - eng ( Нідерланди )",
+          "spend": 397.18,
+          "leads": 58,
+          "cpl": 6.847931,
+          "ctr": 3.913251
         },
         {
-          "name": "SNAP - TOF - 15.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина, Чехія, Бельгия )",
-          "spend": 35.33,
-          "leads": 2,
-          "cpl": 17.665,
-          "ctr": 1.885014
+          "name": "SNAP - TOF - 15.06  - ENG - Valencia ( Нідерланди,  Латвія Литва, Німеччина )",
+          "spend": 326.74,
+          "leads": 20,
+          "cpl": 16.337,
+          "ctr": 2.418884
         },
         {
-          "name": "SNAP - TOF -  Costa-Blanca - 15.07  - eng",
-          "spend": 38.24,
-          "leads": 2,
-          "cpl": 19.12,
-          "ctr": 2.579132
+          "name": "SNAP - INV -  - TOF  - 17.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша, Австрия )",
+          "spend": 19.17,
+          "leads": 0,
+          "cpl": 0.0,
+          "ctr": 1.415701
         }
       ]
     }
