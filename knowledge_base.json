@@ -10,7 +10,7 @@
   ],
   "warm_contacts": {},
   "total_posts": 141,
-  "last_updated": "2026-08-13T21:34:17.121530+00:00",
+  "last_updated": "2026-08-14T21:15:45.681641+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -74,72 +74,72 @@
   "bm_accounts": {
     "act_445844598148716": {
       "niche": "агентство нерухомості в Іспанії",
-      "last_updated": "2026-08-13T21:34:21.538223+00:00",
+      "last_updated": "2026-08-14T21:15:50.407813+00:00",
       "insights_30d": {
-        "spend": 4556.06,
-        "impressions": 539104,
-        "clicks": 12960,
-        "ctr": 2.403989,
-        "cpc": 0.351548,
-        "cpm": 8.451171,
-        "leads": 249,
-        "cpl": 18.520569,
+        "spend": 4531.04,
+        "impressions": 525801,
+        "clicks": 12742,
+        "ctr": 2.42335,
+        "cpc": 0.355599,
+        "cpm": 8.617405,
+        "leads": 250,
+        "cpl": 18.344292,
         "period_days": 30
       },
       "top_campaigns": [
         {
           "name": "SNAP - INV -  - TOF  - 17.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша, Австрия )",
-          "spend": 792.6,
-          "leads": 62,
-          "cpl": 12.783871,
-          "ctr": 2.452064
+          "spend": 820.27,
+          "leads": 63,
+          "cpl": 13.020159,
+          "ctr": 2.424932
         },
         {
           "name": "SNAP INV - TOF - 22.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Чхія, Бельгия )",
-          "spend": 389.29,
+          "spend": 389.3,
           "leads": 45,
-          "cpl": 9.053256,
-          "ctr": 2.752261
+          "cpl": 9.053488,
+          "ctr": 2.752068
         },
         {
           "name": "SNAP -  INV - TOF -  Costa-Blanca - 22.07  - eng",
-          "spend": 579.58,
-          "leads": 39,
-          "cpl": 14.861026,
-          "ctr": 1.724266
+          "spend": 601.3,
+          "leads": 41,
+          "cpl": 14.665854,
+          "ctr": 1.730673
         }
       ]
     }
   },
-  "bm_last_updated": "2026-08-13T21:34:22.088926+00:00",
+  "bm_last_updated": "2026-08-14T21:15:51.351529+00:00",
   "bm_cases": [
     {
       "niche": "агентство нерухомості в Іспанії",
-      "spend": 4556.06,
-      "leads": 249,
-      "cpl": 18.520569,
-      "ctr": 2.403989,
+      "spend": 4531.04,
+      "leads": 250,
+      "cpl": 18.344292,
+      "ctr": 2.42335,
       "top_campaigns": [
         {
           "name": "SNAP - INV -  - TOF  - 17.07  - rus/ukr - Valencia ( Чехия, Латвія Литва, Німеччина, Нідерланди, Польша, Австрия )",
-          "spend": 792.6,
-          "leads": 62,
-          "cpl": 12.783871,
-          "ctr": 2.452064
+          "spend": 820.27,
+          "leads": 63,
+          "cpl": 13.020159,
+          "ctr": 2.424932
         },
         {
           "name": "SNAP INV - TOF - 22.07  - ENG - Valencia ( Нідерланди,  Латвія Литва, Чхія, Бельгия )",
-          "spend": 389.29,
+          "spend": 389.3,
           "leads": 45,
-          "cpl": 9.053256,
-          "ctr": 2.752261
+          "cpl": 9.053488,
+          "ctr": 2.752068
         },
         {
           "name": "SNAP -  INV - TOF -  Costa-Blanca - 22.07  - eng",
-          "spend": 579.58,
-          "leads": 39,
-          "cpl": 14.861026,
-          "ctr": 1.724266
+          "spend": 601.3,
+          "leads": 41,
+          "cpl": 14.665854,
+          "ctr": 1.730673
         }
       ]
     }
