@@ -10,7 +10,7 @@
   ],
   "warm_contacts": {},
   "total_posts": 141,
-  "last_updated": "2026-08-21T21:13:47.863179+00:00",
+  "last_updated": "2026-08-22T21:11:56.174168+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -74,72 +74,72 @@
   "bm_accounts": {
     "act_445844598148716": {
       "niche": "агентство нерухомості в Іспанії",
-      "last_updated": "2026-08-21T21:13:51.984356+00:00",
+      "last_updated": "2026-08-22T21:12:00.017163+00:00",
       "insights_30d": {
-        "spend": 4771.87,
-        "impressions": 435726,
-        "clicks": 11694,
-        "ctr": 2.683797,
-        "cpc": 0.408061,
-        "cpm": 10.951538,
-        "leads": 295,
-        "cpl": 16.454724,
+        "spend": 4773.62,
+        "impressions": 421816,
+        "clicks": 11493,
+        "ctr": 2.724648,
+        "cpc": 0.41535,
+        "cpm": 11.31683,
+        "leads": 305,
+        "cpl": 15.912067,
         "period_days": 30
       },
       "top_campaigns": [
         {
           "name": "SNAP -  INV - TOF -  Costa-Blanca - 22.07  - eng",
-          "spend": 776.3,
+          "spend": 781.95,
           "leads": 52,
-          "cpl": 14.928846,
-          "ctr": 1.734653
+          "cpl": 15.0375,
+          "ctr": 1.735011
         },
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 352.89,
-          "leads": 26,
-          "cpl": 13.572692,
-          "ctr": 3.464799
+          "spend": 446.39,
+          "leads": 36,
+          "cpl": 12.399722,
+          "ctr": 3.501664
         },
         {
           "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 210.94,
+          "spend": 219.26,
           "leads": 26,
-          "cpl": 8.789167,
-          "ctr": 1.879263
+          "cpl": 9.135833,
+          "ctr": 1.847963
         }
       ]
     }
   },
-  "bm_last_updated": "2026-08-21T21:13:52.520854+00:00",
+  "bm_last_updated": "2026-08-22T21:12:00.616681+00:00",
   "bm_cases": [
     {
       "niche": "агентство нерухомості в Іспанії",
-      "spend": 4771.87,
-      "leads": 295,
-      "cpl": 16.454724,
-      "ctr": 2.683797,
+      "spend": 4773.62,
+      "leads": 305,
+      "cpl": 15.912067,
+      "ctr": 2.724648,
       "top_campaigns": [
         {
           "name": "SNAP -  INV - TOF -  Costa-Blanca - 22.07  - eng",
-          "spend": 776.3,
+          "spend": 781.95,
           "leads": 52,
-          "cpl": 14.928846,
-          "ctr": 1.734653
+          "cpl": 15.0375,
+          "ctr": 1.735011
         },
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 352.89,
-          "leads": 26,
-          "cpl": 13.572692,
-          "ctr": 3.464799
+          "spend": 446.39,
+          "leads": 36,
+          "cpl": 12.399722,
+          "ctr": 3.501664
         },
         {
           "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 210.94,
+          "spend": 219.26,
           "leads": 26,
-          "cpl": 8.789167,
-          "ctr": 1.879263
+          "cpl": 9.135833,
+          "ctr": 1.847963
         }
       ]
     }
