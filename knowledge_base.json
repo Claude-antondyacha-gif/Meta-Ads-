@@ -10,7 +10,7 @@
   ],
   "warm_contacts": {},
   "total_posts": 141,
-  "last_updated": "2026-08-27T00:20:15.952836+00:00",
+  "last_updated": "2026-08-28T05:01:11.059516+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -74,72 +74,72 @@
   "bm_accounts": {
     "act_445844598148716": {
       "niche": "агентство нерухомості в Іспанії",
-      "last_updated": "2026-08-27T00:20:20.134273+00:00",
+      "last_updated": "2026-08-28T05:01:15.049154+00:00",
       "insights_30d": {
-        "spend": 4703.96,
-        "impressions": 352682,
-        "clicks": 10301,
-        "ctr": 2.920761,
-        "cpc": 0.456651,
-        "cpm": 13.337681,
-        "leads": 322,
-        "cpl": 14.745956,
+        "spend": 4651.77,
+        "impressions": 340944,
+        "clicks": 10144,
+        "ctr": 2.975269,
+        "cpc": 0.458574,
+        "cpm": 13.643795,
+        "leads": 326,
+        "cpl": 14.446491,
         "period_days": 30
       },
       "top_campaigns": [
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 822.28,
-          "leads": 78,
-          "cpl": 10.542051,
-          "ctr": 2.845378
+          "spend": 874.25,
+          "leads": 85,
+          "cpl": 10.285294,
+          "ctr": 2.848257
         },
         {
           "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 263.4,
+          "spend": 271.06,
           "leads": 29,
-          "cpl": 9.755556,
-          "ctr": 1.823482
+          "cpl": 10.039259,
+          "ctr": 1.826053
         },
         {
           "name": "UK - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 333.32,
-          "leads": 22,
-          "cpl": 15.150909,
-          "ctr": 2.107874
+          "spend": 359.49,
+          "leads": 25,
+          "cpl": 14.97875,
+          "ctr": 2.121927
         }
       ]
     }
   },
-  "bm_last_updated": "2026-08-27T00:20:20.525229+00:00",
+  "bm_last_updated": "2026-08-28T05:01:15.722863+00:00",
   "bm_cases": [
     {
       "niche": "агентство нерухомості в Іспанії",
-      "spend": 4703.96,
-      "leads": 322,
-      "cpl": 14.745956,
-      "ctr": 2.920761,
+      "spend": 4651.77,
+      "leads": 326,
+      "cpl": 14.446491,
+      "ctr": 2.975269,
       "top_campaigns": [
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 822.28,
-          "leads": 78,
-          "cpl": 10.542051,
-          "ctr": 2.845378
+          "spend": 874.25,
+          "leads": 85,
+          "cpl": 10.285294,
+          "ctr": 2.848257
         },
         {
           "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 263.4,
+          "spend": 271.06,
           "leads": 29,
-          "cpl": 9.755556,
-          "ctr": 1.823482
+          "cpl": 10.039259,
+          "ctr": 1.826053
         },
         {
           "name": "UK - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 333.32,
-          "leads": 22,
-          "cpl": 15.150909,
-          "ctr": 2.107874
+          "spend": 359.49,
+          "leads": 25,
+          "cpl": 14.97875,
+          "ctr": 2.121927
         }
       ]
     }
