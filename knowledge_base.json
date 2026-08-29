@@ -10,7 +10,7 @@
   ],
   "warm_contacts": {},
   "total_posts": 141,
-  "last_updated": "2026-08-28T05:01:11.059516+00:00",
+  "last_updated": "2026-08-29T02:56:20.017199+00:00",
   "psychology_frameworks": {
     "cialdini_influence": {
       "source": "Роберт Чалдіні — Психологія впливу",
@@ -74,72 +74,72 @@
   "bm_accounts": {
     "act_445844598148716": {
       "niche": "агентство нерухомості в Іспанії",
-      "last_updated": "2026-08-28T05:01:15.049154+00:00",
+      "last_updated": "2026-08-29T02:56:24.787954+00:00",
       "insights_30d": {
-        "spend": 4651.77,
-        "impressions": 340944,
-        "clicks": 10144,
-        "ctr": 2.975269,
-        "cpc": 0.458574,
-        "cpm": 13.643795,
-        "leads": 326,
-        "cpl": 14.446491,
+        "spend": 4664.79,
+        "impressions": 327113,
+        "clicks": 10005,
+        "ctr": 3.058576,
+        "cpc": 0.466246,
+        "cpm": 14.260485,
+        "leads": 337,
+        "cpl": 14.008378,
         "period_days": 30
       },
       "top_campaigns": [
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 874.25,
-          "leads": 85,
-          "cpl": 10.285294,
-          "ctr": 2.848257
-        },
-        {
-          "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 271.06,
-          "leads": 29,
-          "cpl": 10.039259,
-          "ctr": 1.826053
+          "spend": 939.4,
+          "leads": 91,
+          "cpl": 10.323077,
+          "ctr": 2.899915
         },
         {
           "name": "UK - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 359.49,
-          "leads": 25,
-          "cpl": 14.97875,
-          "ctr": 2.121927
+          "spend": 464.86,
+          "leads": 30,
+          "cpl": 16.029655,
+          "ctr": 2.211668
+        },
+        {
+          "name": "EUROPA - SNAP Famely - TOF - 05.08  - ENG - Valencia — Villas",
+          "spend": 38.94,
+          "leads": 6,
+          "cpl": 6.49,
+          "ctr": 2.294943
         }
       ]
     }
   },
-  "bm_last_updated": "2026-08-28T05:01:15.722863+00:00",
+  "bm_last_updated": "2026-08-29T02:56:25.207484+00:00",
   "bm_cases": [
     {
       "niche": "агентство нерухомості в Іспанії",
-      "spend": 4651.77,
-      "leads": 326,
-      "cpl": 14.446491,
-      "ctr": 2.975269,
+      "spend": 4664.79,
+      "leads": 337,
+      "cpl": 14.008378,
+      "ctr": 3.058576,
       "top_campaigns": [
         {
           "name": "US - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 874.25,
-          "leads": 85,
-          "cpl": 10.285294,
-          "ctr": 2.848257
-        },
-        {
-          "name": "RUSS - SNAP - Catalog - TOF - LeadForm- 01.08",
-          "spend": 271.06,
-          "leads": 29,
-          "cpl": 10.039259,
-          "ctr": 1.826053
+          "spend": 939.4,
+          "leads": 91,
+          "cpl": 10.323077,
+          "ctr": 2.899915
         },
         {
           "name": "UK - TOF - ABO - LeadForm - 18/08  - Famely",
-          "spend": 359.49,
-          "leads": 25,
-          "cpl": 14.97875,
-          "ctr": 2.121927
+          "spend": 464.86,
+          "leads": 30,
+          "cpl": 16.029655,
+          "ctr": 2.211668
+        },
+        {
+          "name": "EUROPA - SNAP Famely - TOF - 05.08  - ENG - Valencia — Villas",
+          "spend": 38.94,
+          "leads": 6,
+          "cpl": 6.49,
+          "ctr": 2.294943
         }
       ]
     }
